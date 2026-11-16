@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BANK SAHAYAK — Smart Banking Assistance System</title>
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --primary-dark: #093256;
+      --accent: #00a896;
+      --accent-light: #e6f7f5;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --warn: #d97706;
+      --warn-bg: #fef3c7;
+      --scale: 1;
+    }
+    body.large-text { --scale: 1.18; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); font-size: calc(16px * var(--scale)); line-height: 1.5; }
+
+    /* Top Kiosk Header */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .brand h1 { font-size: calc(1.35rem * var(--scale)); letter-spacing: 0.5px; }
+    .brand p { font-size: calc(0.82rem * var(--scale)); opacity: 0.9; }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+    .lang-btn, .util-btn {
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: calc(0.85rem * var(--scale));
+      transition: 0.2s;
+    }
+    .lang-btn.active, .lang-btn:hover, .util-btn:hover {
+      background: #fff;
+      color: var(--primary-dark);
+    }
+
+    main { max-width: 1100px; margin: 1.25rem auto; padding: 0 1rem 3rem; }
+
+    /* Problem Statement Banner */
+    .problem-banner {
+      background: #e0f2fe;
+      border-left: 5px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+    }
+    .problem-banner strong { color: var(--primary-dark); display: block; margin-bottom: 0.25rem; }
+
+    /* Navigation Tabs */
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .tab-btn {
+      background: var(--card);
+      border: 2px solid var(--border);
+      padding: 1rem;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .tab-btn.active {
+      border-color: var(--primary);
+      background: #f0f7ff;
+    }
+    .tab-btn h3 { color: var(--primary); font-size: calc(1.05rem * var(--scale)); margin-bottom: 0.2rem; }
+    .tab-btn span { color: var(--muted); font-size: calc(0.85rem * var(--scale)); }
+
+    /* Panels */
+    .panel {
+      display: none;
+      background: var(--card);
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .panel.active { display: block; }
+    .panel-title { font-size: calc(1.25rem * var(--scale)); color: var(--primary-dark); margin-bottom: 0.35rem; }
+    .panel-sub { color: var(--muted); margin-bottom: 1.25rem; font-size: calc(0.92rem * var(--scale)); }
+
+    /* Form Helper */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+    .field-group { margin-bottom: 0.9rem; }
+    .field-group label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+    .field-group input, .field-group select {
+      width: 100%; padding: 0.65rem; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: calc(0.95rem * var(--scale));
+    }
+    .hint { font-size: calc(0.82rem * var(--scale)); color: var(--accent); margin-top: 0.2rem; font-weight: 500; }
+    .slip-preview {
+      background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 12px; padding: 1.25rem;
+    }
+    .slip-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid #fde68a; }
+
+    /* Digital Payment Steps */
+    .step-card {
+      border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 0.85rem;
+      display: flex; gap: 0.9rem; align-items: flex-start; background: #fafcff;
+    }
+    .step-num {
+      background: var(--primary); color: #fff; width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .safety-box {
+      background: var(--warn-bg); border-left: 4px solid var(--warn); padding: 0.9rem 1rem;
+      border-radius: 8px; margin-top: 1rem; color: #78350f;
+    }
+
+    /* Counter Navigator */
+    .service-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .pill {
+      padding: 0.55rem 1rem; border-radius: 999px; border: 1.5px solid var(--primary);
+      background: #fff; color: var(--primary); font-weight: 600; cursor: pointer;
+    }
+    .pill.active { background: var(--primary); color: #fff; }
+    .floorplan {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.85rem;
+      background: #f1f5f9; padding: 1.1rem; border-radius: 12px; margin-bottom: 1rem;
+    }
+    .counter-box {
+      background: #fff; border: 2px solid var(--border); border-radius: 10px; padding: 0.9rem;
+      text-align: center; transition: 0.25s;
+    }
+    .counter-box.highlight {
+      border-color: var(--accent); background: var(--accent-light); transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,168,150,0.2);
+    }
+    .token-btn {
+      background: var(--accent); color: #fff; border: none; padding: 0.75rem 1.25rem;
+      border-radius: 8px; font-weight: 700; cursor: pointer; font-size: calc(0.95rem * var(--scale));
+    }
+    .token-display {
+      margin-top: 0.85rem; padding: 0.9rem; background: #ecfdf5; border: 1px solid #10b981;
+      border-radius: 8px; font-weight: 600; color: #065f46; display: none;
+    }
+
+    /* Problem Identification & Credits Section */
+    .section-card {
+      background: var(--card); border-radius: 14px; padding: 1.5rem; margin-top: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+    th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; color: var(--primary-dark); }
+    .credits {
+      margin-top: 1.5rem; text-align: center; color: var(--muted); font-size: calc(0.88rem * var(--scale));
+    }
+    .team-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 0.5rem 0; }
+    .chip { background: #e2e8f0; color: var(--text); padding: 0.3rem 0.75rem; border-radius: 999px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>🏦 BANK SAHAYAK</h1>
+      <p id="subtitle">Smart Banking Assistance System • Multilingual Guidance • Form Help • Counter Navigation</p>
+    </div>
+    <div class="controls">
+      <button class="lang-btn active" onclick="setLang('en', this)">English</button>
+      <button class="lang-btn" onclick="setLang('hi', this)">हिन्दी</button>
+      <button class="lang-btn" onclick="setLang('kn', this)">ಕನ್ನಡ</button>
+      <button class="lang-btn" onclick="setLang('ta', this)">தமிழ்</button>
+      <button class="util-btn" onclick="document.body.classList.toggle('large-text')">A+ Text</button>
+      <button class="util-btn" onclick="speakGuide()">🔊 Audio</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="problem-banner">
+    <strong id="ps-label">Problem Statement:</strong>
+    <span id="ps-text">Customers need clear, multilingual guidance to complete common banking tasks and find the correct counter.</span>
+  </div>
+
+  <!-- Kiosk Feature Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('forms', this)">
+      <h3 id="tab1-title">1. Form-Filling Assistant</h3>
+      <span id="tab1-sub">Step-by-step help for slips & KYC</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('digital', this)">
+      <h3 id="tab2-title">2. Safe Digital Payments</h3>
+      <span id="tab2-sub">Simple UPI & mobile transfer guide</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('counters', this)">
+      <h3 id="tab3-title">3. Counter Navigation</h3>
+      <span id="tab3-sub">Find the right cabin & get a token</span>
+    </button>
+  </div>
+
+  <!-- Panel 1: Form Assistant -->
+  <section id="panel-forms" class="panel active">
+    <h2 class="panel-title" id="f-heading">Interactive Form-Filling Guide</h2>
+    <p class="panel-sub" id="f-sub">Select a bank slip and type your details to see exactly where to write them on the paper form.</p>
+    <div class="form-grid">
+      <div>
+        <div class="field-group">
+          <label>Select Form Type</label>
+          <select id="formType" onchange="updateSlip()">
+            <option value="Cash Deposit Slip">Cash Deposit Slip</option>
+            <option value="Cash Withdrawal Slip">Cash Withdrawal Slip</option>
+            <option value="NEFT / RTGS Transfer Form">NEFT / RTGS Transfer Form</option>
+            <option value="KYC Update Form">KYC Update Form</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Account Holder Name</label>
+          <input type="text" id="inName" placeholder="e.g., Sandhya S" oninput="updateSlip()" />
+          <div class="hint">Write in CAPITAL LETTERS as printed on your passbook.</div>
+        </div>
+        <div class="field-group">
+          <label>Account Number (11–16 Digits)</label>
+          <input type="text" id="inAcc" placeholder="e.g., 30981234567" oninput="updateSlip()" />
+          <div class="hint">Check the first page of your bank passbook.</div>
+        </div>
+        <div class="field-group">
+          <label>Amount (₹)</label>
+          <input type="number" id="inAmt" placeholder="e.g., 5000" oninput="updateSlip()" />
+          <div class="hint">Write both in numbers (₹5000) and in words (Five Thousand Only).</div>
+        </div>
+      </div>
+
+      <div class="slip-preview">
+        <h3 style="margin-bottom:0.75rem; color:#92400e;">📄 Live Paper Slip Preview</h3>
+        <div class="slip-row"><span>Form:</span><strong id="outForm">Cash Deposit Slip</strong></div>
+        <div class="slip-row"><span>Date:</span><strong id="outDate"></strong></div>
+        <div class="slip-row"><span>Name:</span><strong id="outName">—</strong></div>
+        <div class="slip-row"><span>Account No:</span><strong id="outAcc">—</strong></div>
+        <div class="slip-row"><span>Amount:</span><strong id="outAmt">₹ 0</strong></div>
+        <p style="margin-top:0.9rem; font-size:0.85rem; color:#78350f;">✅ Remember to sign at the bottom right corner before handing the slip to the counter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 2: Digital Payments -->
+  <section id="panel-digital" class="panel">
+    <h2 class="panel-title" id="d-heading">Safe Digital Payment Walkthrough</h2>
+    <p class="panel-sub">Follow these 4 simple steps to pay safely using UPI or Mobile Banking.</p>
+
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div><strong>Open Your Trusted Bank / UPI App</strong><p>Unlock your phone and open BHIM, Google Pay, PhonePe, or your official bank app.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div><strong>Scan QR or Enter Verified Mobile Number</strong><p>Tap "Scan QR" at the shop counter and verify the receiver's registered banking name on screen.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div><strong>Enter Amount & Check Carefully</strong><p>Type the exact rupee amount. Never enter your UPI PIN to <em>receive</em> money.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div><strong>Enter Secret 4 or 6-Digit UPI PIN</strong><p>Cover your screen while typing your PIN. Wait for the green checkmark confirmation.</p></div>
+    </div>
+
+    <div class="safety-box">
+      <strong>⚠️ Anti-Fraud Rule:</strong> Bank staff will NEVER ask for your OTP, ATM PIN, or UPI PIN over phone or at the counter.
+    </div>
+  </section>
+
+  <!-- Panel 3: Counter Navigation -->
+  <section id="panel-counters" class="panel">
+    <h2 class="panel-title" id="c-heading">Smart Branch Counter & Cabin Navigator</h2>
+    <p class="panel-sub">Tap what you need today to highlight the exact counter and generate a queue token.</p>
+
+    <div class="service-pills">
+      <button class="pill active" onclick="selectCounter(1, 'Cash Deposit / Withdrawal', 'Passbook & Filled Slip', this)">💵 Cash Deposit / Withdrawal</button>
+      <button class="pill" onclick="selectCounter(2, 'Passbook Printing & Statement', 'Bank Passbook', this)">📘 Passbook Update</button>
+      <button class="pill" onclick="selectCounter(3, 'New Account / KYC / ATM Card', 'Aadhaar, PAN & 2 Photos', this)">🪪 KYC / New Account</button>
+      <button class="pill" onclick="selectCounter(4, 'Loans & Senior Citizen Helpdesk', 'ID Proof & Income Docs', this)">🤝 Loans / Manager Cabin</button>
+    </div>
+
+    <div class="floorplan">
+      <div class="counter-box highlight" id="cbox-1"><strong>Counter 1</strong><p>Cash & Teller</p></div>
+      <div class="counter-box" id="cbox-2"><strong>Counter 2</strong><p>Passbook & DD</p></div>
+      <div class="counter-box" id="cbox-3"><strong>Counter 3</strong><p>KYC & Accounts</p></div>
+      <div class="counter-box" id="cbox-4"><strong>Cabin 4</strong><p>Loans & Manager</p></div>
+    </div>
+
+    <p style="margin-bottom:0.8rem;">📍 <strong>Destination:</strong> <span id="dest-text">Counter 1 (Cash Deposit / Withdrawal)</span> &nbsp;|&nbsp; 📋 <strong>Carry:</strong> <span id="doc-text">Passbook & Filled Slip</span></p>
+    <button class="token-btn" onclick="generateToken()">🎟️ Generate Queue Token</button>
+    <div class="token-display" id="tokenBox"></div>
+  </section>
+
+  <!-- 1. Problem Identification (From IDT Presentation Slide) -->
+  <section class="section-card">
+    <h2 class="panel-title">1. Problem Identification</h2>
+    <p class="panel-sub">During a bank visit, we identified common difficulties customers may face:</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30%;">Challenge</th>
+          <th>Customer Difficulty Identified</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Form-filling barriers</strong></td>
+          <td>Some customers find forms difficult because of language differences, unfamiliar terms or limited literacy.</td>
+        </tr>
+        <tr>
+          <td><strong>Digital payment confusion</strong></td>
+          <td>Some customers need simple, safe, step-by-step explanations of digital payment processes.</td>
+        </tr>
+        <tr>
+          <td><strong>Counter navigation</strong></td>
+          <td>Customers may be unsure which counter or cabin handles their particular request.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Project Credits -->
+  <footer class="credits">
+    <p><strong>IDT MINI PROJECT PRESENTATION • HARDWARE + SOFTWARE CONCEPT</strong></p>
+    <p>Department of Electronics and Communication Engineering</p>
+    <div class="team-chips">
+      <span class="chip">Epsiba.R</span>
+      <span class="chip">Gonxha Meryln Santos</span>
+      <span class="chip">Rumeasanoor</span>
+      <span class="chip">Sandhya.S</span>
+    </div>
+  </footer>
+</main>
+
+<script>
+  document.getElementById('outDate').textContent = new Date().toLocaleDateString('en-IN');
+
+  const translations = {
+    en: {
+      ps: "Customers need clear, multilingual guidance to complete common banking tasks and find the correct counter.",
+      t1: "1. Form-Filling Assistant", t2: "2. Safe Digital Payments", t3: "3. Counter Navigation"
+    },
+    hi: {
+      ps: "ग्राहकों को सामान्य बैंकिंग कार्यों को पूरा करने और सही काउंटर खोजने के लिए स्पष्ट, बहुभाषी मार्गदर्शन की आवश्यकता है।",
+      t1: "1. फॉर्म भरने में सहायता", t2: "2. सुरक्षित डिजिटल भुगतान", t3: "3. काउंटर नेविगेशन"
+    },
+    kn: {
+      ps: "ಸಾಮಾನ್ಯ ಬ್ಯಾಂಕಿಂಗ್ ಕಾರ್ಯಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ಮತ್ತು ಸರಿಯಾದ ಕೌಂಟರ್ ಹುಡುಕಲು ಗ್ರಾಹಕರಿಗೆ ಸ್ಪಷ್ಟ, ಬಹುಭಾಷಾ ಮಾರ್ಗದರ್ಶನದ ಅಗತ್ಯವಿದೆ.",
+      t1: "1. ಫಾರ್ಮ್ ಭರ್ತಿ ಸಹಾಯಕ", t2: "2. ಸುರಕ್ಷಿತ ಡಿಜಿಟಲ್ ಪಾವತಿ", t3: "3. ಕೌಂಟರ್ ಮಾರ್ಗದರ್ಶನ"
+    },
+    ta: {
+      ps: "பொதுவான வங்கிப் பணிகளை முடிக்கவும் சரியான கவுண்டரைக் கண்டறியவும் வாடிக்கையாளர்களுக்குத் தெளிவான, பன்மொழி வழிகாட்டுதல் தேவை.",
+      t1: "1. படிவம் நிரப்பும் உதவி", t2: "2. பாதுகாப்பான டிஜிட்டல் கட்டணம்", t3: "3. கவுண்டர் வழிகாட்டி"
+    }
+  };
+
+  function setLang(code, btn) {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const t = translations[code];
+    document.getElementById('ps-text').textContent = t.ps;
+    document.getElementById('tab1-title').textContent = t.t1;
+    document.getElementById('tab2-title').textContent = t.t2;
+    document.getElementById('tab3-title').textContent = t.t3;
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+  }
+
+  function updateSlip() {
+    document.getElementById('outForm').textContent = document.getElementById('formType').value;
+    document.getElementById('outName').textContent = document.getElementById('inName').value || '—';
+    document.getElementById('outAcc').textContent = document.getElementById('inAcc').value || '—';
+    const amt = document.getElementById('inAmt').value;
+    document.getElementById('outAmt').textContent = amt ? '₹ ' + Number(amt).toLocaleString('en-IN') : '₹ 0';
+  }
+
+  let currentCounter = 1;
+  function selectCounter(num, service, docs, btn) {
+    currentCounter = num;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.counter-box').forEach(c => c.classList.remove('highlight'));
+    document.getElementById('cbox-' + num).classList.add('highlight');
+    document.getElementById('dest-text').textContent = (num === 4 ? 'Cabin ' : 'Counter ') + num + ' (' + service + ')';
+    document.getElementById('doc-text').textContent = docs;
+    document.getElementById('tokenBox').style.display = 'none';
+  }
+
+  function generateToken() {
+    const tokenNum = 'BS-' + currentCounter + '0' + Math.floor(1 + Math.random() * 9);
+    const box = document.getElementById('tokenBox');
+    box.style.display = 'block';
+    box.innerHTML = `✅ Your Token Number is <strong>${tokenNum}</strong>. Please proceed to <strong>${currentCounter === 4 ? 'Cabin' : 'Counter'} ${currentCounter}</strong>.`;
+  }
+
+  function speakGuide() {
+    if ('speechSynthesis' in window) {
+      const msg = new SpeechSynthesisUtterance(document.getElementById('ps-text').textContent);
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(msg);
+    } else {
+      alert('Audio guidance: ' + document.getElementById('ps-text').textContent);
+    }
+  }
+</script>
+</body>
+  </html>
+  
